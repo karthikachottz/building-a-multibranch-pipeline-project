@@ -9,6 +9,7 @@ pipeline {
                 bat 'npm install'  // Install dependencies using npm
             }
         }
+        
         stage('Test') {
             steps {
                 bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "chmod +x ./jenkins/scripts/test.sh && ./jenkins/scripts/test.sh"'  // Run test.sh with bash
@@ -21,7 +22,10 @@ pipeline {
             }
             steps {
                 bat "C:\\Program Files\\Git\\bin\\bash.exe -c './jenkins/scripts/deliver-for-development.sh'"
-                input message: 'Finished using the web site? (Click "Proceed" to continue)', timeout: 300
+                input message: 'Finished using the web site? (Click "Proceed" to continue)', 
+                      parameters: [], 
+                      timeout: 300000, 
+                      timeoutMessage: 'Timeout reached'
                 bat "C:\\Program Files\\Git\\bin\\bash.exe -c './jenkins/scripts/kill.sh'"
             }
         }
@@ -32,7 +36,10 @@ pipeline {
             }
             steps {
                 bat "C:\\Program Files\\Git\\bin\\bash.exe -c './jenkins/scripts/deploy-for-production.sh'"
-                input message: 'Finished using the web site? (Click "Proceed" to continue)', timeout: 300
+                input message: 'Finished using the web site? (Click "Proceed" to continue)', 
+                      parameters: [], 
+                      timeout: 300000, 
+                      timeoutMessage: 'Timeout reached'
                 bat "C:\\Program Files\\Git\\bin\\bash.exe -c './jenkins/scripts/kill.sh'"
             }
         }
