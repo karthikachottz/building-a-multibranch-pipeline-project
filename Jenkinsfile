@@ -1,17 +1,22 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:lts-alpine'
+            args '-p 3000:3000 -p 5000:5000'
+        }
+    }
     environment {
         CI = 'true'
     }
     stages {
         stage('Build') {
             steps {
-                bat 'npm install'  // Install dependencies using npm
+                sh 'npm install'
             }
         }
         stage('Test') {
             steps {
-                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "chmod +x ./jenkins/scripts/test.sh && ./jenkins/scripts/test.sh"'  // Run test.sh with bash
+                sh './jenkins/scripts/test.sh'
             }
         }
         stage('Deliver for development') {
@@ -19,9 +24,9 @@ pipeline {
                 branch 'development'
             }
             steps {
-                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "./jenkins/scripts/deliver-for-development.sh"'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)', timeout: 300, timeoutMessage: 'Timeout reached'
-                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "./jenkins/scripts/kill.sh"'
+                sh './jenkins/scripts/deliver-for-development.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
             }
         }
         stage('Deploy for production') {
@@ -29,9 +34,9 @@ pipeline {
                 branch 'production'
             }
             steps {
-                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "./jenkins/scripts/deploy-for-production.sh"'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)', timeout: 300, timeoutMessage: 'Timeout reached'
-                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "./jenkins/scripts/kill.sh"'
+                sh './jenkins/scripts/deploy-for-production.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
             }
         }
     }
