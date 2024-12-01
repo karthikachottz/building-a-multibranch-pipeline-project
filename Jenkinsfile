@@ -1,22 +1,17 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:lts-alpine'
-            args '-p 3000:3000 -p 5000:5000'
-        }
-    }
+    agent any
     environment {
         CI = 'true'
     }
     stages {
         stage('Build') {
             steps {
-                sh 'npm install'
+                bat 'npm install'
             }
         }
         stage('Test') {
             steps {
-                sh './jenkins/scripts/test.sh'
+                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "chmod +x ./jenkins/scripts/test.sh && ./jenkins/scripts/test.sh"'
             }
         }
         stage('Deliver for development') {
@@ -24,9 +19,13 @@ pipeline {
                 branch 'development'
             }
             steps {
-                sh './jenkins/scripts/deliver-for-development.sh'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh './jenkins/scripts/kill.sh'
+                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "./jenkins/scripts/deliver-for-development.sh"'
+                
+                timeout(time: 5, unit: 'MINUTES') { // Wrap input in a timeout block
+                    input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                }
+                
+                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "./jenkins/scripts/kill.sh"'
             }
         }
         stage('Deploy for production') {
@@ -34,10 +33,15 @@ pipeline {
                 branch 'production'
             }
             steps {
-                sh './jenkins/scripts/deploy-for-production.sh'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh './jenkins/scripts/kill.sh'
+                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "./jenkins/scripts/deploy-for-production.sh"'
+                
+                timeout(time: 5, unit: 'MINUTES') { // Wrap input in a timeout block
+                    input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                }
+                
+                bat '"C:\\Program Files\\Git\\bin\\bash.exe" -c "./jenkins/scripts/kill.sh"'
             }
         }
+
     }
 }
